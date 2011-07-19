@@ -39,7 +39,7 @@ describe Toybot::Input do
         target.should_receive(:ping).exactly(3).times.with(
           an_instance_of(String), an_instance_of(Array)
         )
-        handler = lambda { |cmd, args| target.ping(cmd, args) }
+        handler = Proc.new { |cmd, args| target.ping(cmd, args) }
         do_start &handler
       end
 
@@ -49,9 +49,7 @@ describe Toybot::Input do
 
       before do
         @collector = double('collector')
-        @handler = Proc.new { |cmd, args|
-          @collector.ping(cmd, args)
-        }
+        @handler = Proc.new { |cmd, args| @collector.ping(cmd, args) }
       end
 
       it 'should be downcased' do
