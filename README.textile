@@ -1,0 +1,87 @@
+h1. Toybot
+
+h2. Installation and setup
+
+Toybot depends on the following gems in it's operations:
+
+* bundler
+* rb-readline
+* state_machine
+* rspec
+
+The valid Gemfile is checked into the repository, so provided you have bundler already available -
+the installation of all dependencies should be as easy as:
+
+<pre>bundle install</pre>
+
+If bundler gem is not available, please install it first:
+
+<pre>gem install bundler</pre>
+
+
+
+h2. Usage
+
+Toybot supports two modes of operation: interactive via a shell, and non-interactive using stdin.
+In both cases toybot.rb file in the root of the project is the main point of entry.
+
+h3. Shell
+
+If you want to work interactively - run ./toybot.rb and start issuing commands into it's shell:
+<pre>
+% ./toybot.rb
+> PLACE 1,1,NORTH
+> MOVE
+> RIGHT
+> MOVE
+> REPORT
+2,2,EAST
+</pre>
+
+To exit from the shell - give Toybot an empty command, i.e. just press Enter in the prompt.
+
+h3. STDIN
+
+If you want to pass some predefined scenario from a file - feed it into STDIN of toybot.rb:
+<pre>
+% ./toybot.rb < spec/data/5x5/moving_inside.txt
+3,3,NORTH
+</pre>
+
+
+h2. Protocol and supported commands
+
+The following commands are supported.
+
+h3. PLACE X,Y,F
+
+Places Toybot on the board.
+
+X and Y are integer coordinates on the board (starting with 0,0 as the south-west corner), and F is the initial direction of Toybot - valid values are *NORTH,EAST,WEST and SOUTH.*
+
+Any PLACE commands putting Toybot outside the current board will be silently ignored. Multiple PLACE commands will be issued during the session, but until the first PLACE commands correctly put Toybot onto the board - all other commands will be also be silently ignored.
+
+h3. MOVE
+
+Moves Toybot one step ahead on the board. If this step puts Toybot outside the board - the command will be silently ignored. If Toybot hasn't been placed on the board yet - the command will also be ignored.
+
+h3. LEFT
+
+Turns Toybot 90 degrees counter-clockwise. If Toybot hasn't been placed on the board yet - the command will be ignored.
+
+h3. RIGHT
+
+Turns Toybot 90 degrees clockwise. If Toybot hasn't been placed on the board yet - the command will be ignored.
+
+h3. REPORT
+
+Outputs current position and direction of Toybot in the following format:
+<pre>1,2,NORTH</pre>
+
+If Toybot hasn't been placed on the board yet - the command will be ignored.
+
+
+
+h2. Initial task text
+
+The text of the initial task, as it was received, can found in TASK file for your reference.
