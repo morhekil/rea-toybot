@@ -58,12 +58,17 @@ describe 'ToyBot scenarios' do
   # Running a complex test on 3x3 board as a proof of concept
   context 'on 3x3 board' do
     before do
-      @toybot = Toybot::Engine.new(5, 5, @output)
+      @toybot = Toybot::Engine.new(3, 3, @output)
     end
 
     it 'behaves properly' do
       scenario(%w{3x3 complex.txt})
       @output.should == %w{1,1,EAST}
+    end
+
+    it 'can REPORT any number of times' do
+      scenario(%w{3x3 reporting_times.txt})
+      @output.should == %w{1,1,EAST 2,2,NORTH 0,2,WEST}
     end
   end
 
