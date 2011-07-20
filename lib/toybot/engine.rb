@@ -27,6 +27,7 @@ module Toybot
       # Transient states
       state :positioning, :turning_left, :turning_right, :moving
 
+      # Command-triggered events
       event :place_command do
         transition any => :positioning
       end
@@ -38,10 +39,16 @@ module Toybot
       end
       after_transition any => :moving, :do => :move_ahead
 
+      # Block movement should be triggered when there's no empty space ahead -
+      # in this case Toybot goes into a blocked state, and ignores all MOVE commands
+      # until he's repositioned
       event :block_movement do
         transition :active => :blocked
       end
 
+      # Activate event is being triggered after any valid action, and will put
+      # Toybot into either active or blocked states, depending on the availability
+      # of free space ahead of him
       event :activate do
         transition any => :active
       end
@@ -86,7 +93,7 @@ module Toybot
     # Validates new position given to the PLACE command
     def validate_position(transition)
       newx, newy, newdir = transition.args
-      valid = valid_coordinates?(newx, newy) && DIR.include?(newdir)
+      valid = valid_coordinates?(newx, newy) && DIR.include?(newdir.to_s)
       throw :halt unless valid
     end
 
