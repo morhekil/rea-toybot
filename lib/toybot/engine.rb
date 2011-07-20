@@ -19,7 +19,7 @@ module Toybot
     attr_accessor :dir
 
     # Valid directions
-    DIR = %w{north east south west}
+    Directions = %w{north east south west}
 
     state_machine :state, :initial => :inactive do
       # Stable states
@@ -103,7 +103,7 @@ module Toybot
     # Validates new position given to the PLACE command
     def validate_position(transition)
       newx, newy, newdir = transition.args
-      valid = valid_coordinates?(newx, newy) && DIR.include?(newdir.to_s)
+      valid = valid_coordinates?(newx, newy) && Directions.include?(newdir.to_s)
       throw :halt unless valid
     end
 
@@ -138,18 +138,18 @@ module Toybot
 
     # Calculated index of the current direction of the Toybot
     def dir_index
-      DIR.index(dir.to_s)
+      Directions.index(dir.to_s)
     end
 
     # Turns ToyBot left
     def turn_left
-      @dir = DIR[dir_index - 1] || DIR.last
+      @dir = Directions[dir_index - 1] || Directions.last
       activate
     end
 
     # Turns ToyBot right
     def turn_right
-      @dir = DIR[dir_index + 1] || DIR.first
+      @dir = Directions[dir_index + 1] || Directions.first
       activate
     end
 
