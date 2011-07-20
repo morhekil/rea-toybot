@@ -4,7 +4,16 @@ require 'rubygems'
 require 'bundler/setup'
 require 'lib/toybot'
 
-toybot = Toybot::Engine.new(5, 5)
+width, height = case ARGV.count
+                when 1
+                  [ARGV.first, ARGV.first]
+                when 2
+                  [ARGV.first, ARGV.last]
+                else
+                  [5, 5]
+                end
+
+toybot = Toybot::Engine.new(width.to_i, height.to_i)
 Toybot::Input.start do |cmd, args|
   error = catch(:error) {
     toybot.execute(cmd, args)
