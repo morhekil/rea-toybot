@@ -43,7 +43,11 @@ into it's shell:
 
 <pre>
 % ./toybot.rb
-> PLACE 1,1,NORTH MOVE RIGHT MOVE REPORT
+> PLACE 1,1,NORTH
+> MOVE
+> RIGHT
+> MOVE
+> REPORT
 2,2,EAST
 </pre>
 
@@ -111,7 +115,7 @@ expected results are described in spec/integration/toybot_spec.rb file.
 
 All scenarios can be run with the following command:
 
-<pre>% rspec -fcb spec/integration/toybot_spec.rb</pre>
+<pre>% rspec -cfd spec/integration/toybot_spec.rb</pre>
 
 h2. Initial task text
 
