@@ -58,20 +58,24 @@ describe 'Toybot Engine' do
     end
 
     describe 'with valid arguments' do
-      before do
-        docmd(%w{1 0 north})
-      end
-
       it 'should set the position' do
+        docmd(%w{1 0 north})
         @toybot.pos.should == [1, 0]
       end
 
       it 'should set the direction' do
+        docmd(%w{1 0 north})
         @toybot.dir.should_not be_nil
       end
 
-      it 'should activate Toybot' do
+      it 'should activate Toybot if there is empty space ahead' do
+        docmd(%w{1 0 north})
         @toybot.state.should == 'active'
+      end
+
+      it 'should leave Toybot in blocked state if there is no empty space ahead' do
+        docmd(%w{1 0 south})
+        @toybot.state.should == 'blocked'
       end
     end
 
@@ -148,15 +152,6 @@ describe 'Toybot Engine' do
     it 'should left Toybot in blocked state if there is no space ahead' do
       toybot_at(0, 1, :south, 'active')
       expect { docmd }.to change{@toybot.state}.from('active').to('blocked')
-    end
-
-  end
-
-  describe 'blocked movement detection' do
-
-    it 'should trigger when Toybot is being placed face to the wall' do
-      @toybot.execute('place', %w{0 1 west})
-      @toybot.state.should == 'blocked'
     end
 
   end
