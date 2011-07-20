@@ -7,10 +7,10 @@ Toybot depends on the following gems in it's operations:
 * bundler
 * rb-readline
 * state_machine
-* rspec
+* rspec (2.x brach)
 
-The valid Gemfile is checked into the repository, so provided you have bundler already available -
-the installation of all dependencies should be as easy as:
+The valid Gemfile is checked into the repository, so provided you have bundler
+already available - the installation of all dependencies should be as easy as:
 
 <pre>bundle install</pre>
 
@@ -18,31 +18,43 @@ If bundler gem is not available, please install it first:
 
 <pre>gem install bundler</pre>
 
-
-
 h2. Usage
 
-Toybot supports two modes of operation: interactive via a shell, and non-interactive using stdin.
-In both cases toybot.rb file in the root of the project is the main point of entry.
+Toybot supports two modes of operation: interactive via a shell, and
+non-interactive using stdin.  In both cases toybot.rb file in the root of the
+project is the main point of entry.
+
+By default Toybot operates on 5x5 board. If you want to have a board of another
+size - you can pass the required size as the argument to toybot.rb. It can be a
+single argument for a square board, e.g. the following command will run Toybot's
+test on a 3x3 board:
+
+<pre>% ./toybot.rb 3 < spec/data/3x3/complex.txt</pre>
+
+Or given two arguments - you can have rectangle-shaped board, e.g. launch the
+shell for 2x6 board:
+
+<pre>% ./toybot.rb 2 6</pre>
 
 h3. Shell
 
-If you want to work interactively - run ./toybot.rb and start issuing commands into it's shell:
+If you want to work interactively - run ./toybot.rb and start issuing commands
+into it's shell:
+
 <pre>
 % ./toybot.rb
-> PLACE 1,1,NORTH
-> MOVE
-> RIGHT
-> MOVE
-> REPORT
+> PLACE 1,1,NORTH MOVE RIGHT MOVE REPORT
 2,2,EAST
 </pre>
 
-To exit from the shell - give Toybot an empty command, i.e. just press Enter in the prompt.
+To exit from the shell - give Toybot an empty command, i.e. just press Enter in
+the prompt.
 
 h3. STDIN
 
-If you want to pass some predefined scenario from a file - feed it into STDIN of toybot.rb:
+If you want to pass some predefined scenario from a file - feed it into STDIN of
+toybot.rb:
+
 <pre>
 % ./toybot.rb < spec/data/5x5/moving_inside.txt
 3,3,NORTH
@@ -57,21 +69,30 @@ h3. PLACE X,Y,F
 
 Places Toybot on the board.
 
-X and Y are integer coordinates on the board (starting with 0,0 as the south-west corner), and F is the initial direction of Toybot - valid values are *NORTH,EAST,WEST and SOUTH.*
+X and Y are integer coordinates on the board (starting with 0,0 as the
+south-west corner), and F is the initial direction of Toybot - valid values are
+*NORTH,EAST,WEST and SOUTH.*
 
-Any PLACE commands putting Toybot outside the current board will be silently ignored. Multiple PLACE commands will be issued during the session, but until the first PLACE commands correctly put Toybot onto the board - all other commands will be also be silently ignored.
+Any PLACE commands putting Toybot outside the current board will be silently
+ignored. Multiple PLACE commands will be issued during the session, but until
+the first PLACE commands correctly put Toybot onto the board - all other
+commands will be also be silently ignored.
 
 h3. MOVE
 
-Moves Toybot one step ahead on the board. If this step puts Toybot outside the board - the command will be silently ignored. If Toybot hasn't been placed on the board yet - the command will also be ignored.
+Moves Toybot one step ahead on the board. If this step puts Toybot outside the
+board - the command will be silently ignored. If Toybot hasn't been placed on
+the board yet - the command will also be ignored.
 
 h3. LEFT
 
-Turns Toybot 90 degrees counter-clockwise. If Toybot hasn't been placed on the board yet - the command will be ignored.
+Turns Toybot 90 degrees counter-clockwise. If Toybot hasn't been placed on the
+board yet - the command will be ignored.
 
 h3. RIGHT
 
-Turns Toybot 90 degrees clockwise. If Toybot hasn't been placed on the board yet - the command will be ignored.
+Turns Toybot 90 degrees clockwise. If Toybot hasn't been placed on the board yet
+- the command will be ignored.
 
 h3. REPORT
 
@@ -81,7 +102,18 @@ Outputs current position and direction of Toybot in the following format:
 If Toybot hasn't been placed on the board yet - the command will be ignored.
 
 
+h2. Provided tests and excercises
+
+Toybot comes with a number of scenarios created to ensure it's compliance with
+all required restrictions and requirements. The scenarios can be found in
+spec/data folder, separately for standard 5x5 and smaller 3x3 board. The
+expected results are described in spec/integration/toybot_spec.rb file.
+
+All scenarios can be run with the following command:
+
+<pre>% rspec -fcb spec/integration/toybot_spec.rb</pre>
 
 h2. Initial task text
 
-The text of the initial task, as it was received, can found in TASK file for your reference.
+The text of the initial task, as it was received, can be found in TASK file for
+your reference.
