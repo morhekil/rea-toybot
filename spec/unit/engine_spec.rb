@@ -61,7 +61,7 @@ describe 'Toybot Engine' do
       end
 
       it 'should activate Toybot' do
-        @toybot.should be_active
+        @toybot.state.should == 'active'
       end
     end
 
@@ -108,4 +108,12 @@ describe 'Toybot Engine' do
 
   end
 
+  describe "blocked movement detection" do
+
+    it "should trigger when Toybot is being placed face to the wall" do
+      @toybot.execute('place', %w{0 1 west})
+      @toybot.state.should == 'blocked'
+    end
+
+  end
 end

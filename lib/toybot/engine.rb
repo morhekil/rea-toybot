@@ -33,9 +33,14 @@ module Toybot
       before_transition any => :positioning, :do => :validate_position
       after_transition any => :positioning, :do => :place
 
+      event :block_movement do
+        transition :active => :blocked
+      end
+
       event :activate do
         transition any => :active
       end
+      after_transition any => :active, :do => :check_ahead
 
     end
 
@@ -76,10 +81,21 @@ module Toybot
     # Validates new position given to the PLACE command
     def validate_position(transition)
       newx, newy, newdir = transition.args
-      valid = (0..(board_width-1)).include?(newx.to_i)
-      valid &&= (0..(board_height-1)).include?(newy.to_i)
-      valid &&= DIR.include?(newdir)
+      valid = valid_coordinates?(newx, newy) && DIR.include?(newdir)
       throw :halt unless valid
+    end
+
+    # Validates given coordinates to be inside the board
+    def valid_coordinates?(x, y)
+      (1..board_width).include?(x.to_i + 1) &&
+        (1..board_height).include?(y.to_i + 1)
+    end
+
+    # Checks if there's an empty space in front of Toybot to move onto.
+    # If there's none - Toybot goes into blocked state, ignoring MOVE commands
+    def check_ahead
+      has_space = !(pos == [0, 1] && dir == 'west')
+      block_movement unless has_space
     end
 
   end
