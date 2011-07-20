@@ -15,7 +15,7 @@ describe 'ToyBot scenarios' do
     end
   end
 
-  context 'on 5x5 board' do
+  context 'on 5x5 board:' do
     before do
       @toybot = Toybot::Engine.new(5, 5)
     end

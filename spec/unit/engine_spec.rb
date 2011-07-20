@@ -83,12 +83,27 @@ describe 'Toybot Engine' do
       end
     end
 
-    describe 'arguments are invalid when' do
+    describe 'arguments validation' do
 
-      it 'new position is outside the board' do
-        bot = docmd(%w{100 -5 north})
-        [bot.posx, bot.posy].should == [nil, nil]
+      def validate(args)
+        transition = double('transition', :args => args)
+        @toybot.send(:validate_position, transition)
       end
+
+      it 'should fail when direction is invalid' do
+        expect { validate(%w{1 1 inside}) }.to throw_symbol(:halt)
+      end
+
+      it 'should fail when new position is outside the board' do
+        expect { validate(%w{100 -5 north}) }.to throw_symbol(:halt)
+      end
+
+      it 'should pass with coordinates are on the board and direction is valid' do
+        %w{north east west south}.each do |dir|
+          expect { validate(%w{1 1} + [dir]) }.not_to throw_symbol(:halt)
+        end
+      end
+
     end
 
   end
