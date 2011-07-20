@@ -127,6 +127,10 @@ describe 'Toybot Engine' do
       @toybot.execute('move', nil)
     end
 
+    it 'should be known to the engine' do
+      @toybot.should respond_to(:move_command)
+    end
+
     it 'should get new coordinates and set them if Toybot is active' do
       toybot_at(1, 1, 'north')
       @toybot.should_receive(:coords_ahead).at_least(:once).and_return([2, 2])
@@ -154,6 +158,70 @@ describe 'Toybot Engine' do
       expect { docmd }.to change{@toybot.state}.from('active').to('blocked')
     end
 
+  end
+
+  describe 'LEFT command' do
+    def docmd
+      @toybot.execute('left', nil)
+    end
+
+    it 'should be known to the engine' do
+      @toybot.should respond_to(:left_command)
+    end
+
+    it 'should change direction counter-clockwise' do
+      {
+        :north => :west,
+        :west => :south,
+        :south => :east,
+        :east => :north
+      }.each_pair do |dir_old, dir_new|
+        toybot_at(1, 1, dir_old)
+        expect { docmd }.to change{ @toybot.dir.to_sym }.from(dir_old).to(dir_new)
+      end
+    end
+
+    it 'should leave Toybot in active state if empty space is ahead' do
+      toybot_at(1, 0, :south, 'blocked')
+      expect { docmd }.to change{ @toybot.state }.from('blocked').to('active')
+    end
+
+    it 'should leave Toybot in blocked state if no empty space is ahead' do
+      toybot_at(1, 0, :west)
+      expect { docmd }.to change{ @toybot.state }.from('active').to('blocked')
+    end
+  end
+
+  describe 'RIGHT command' do
+    def docmd
+      @toybot.execute('right', nil)
+    end
+
+    it 'should be known to the engine' do
+      @toybot.should respond_to(:right_command)
+    end
+
+    it 'should change direction clockwise' do
+      {
+        :north => :east,
+        :east => :south,
+        :south => :west,
+        :west => :north
+      }.each_pair do |dir_old, dir_new|
+        toybot_at(1, 1, dir_old)
+        expect { docmd }.to change{ @toybot.dir.to_sym }.from(dir_old).to(dir_new)
+      end
+    end
+
+    it 'should leave Toybot in active state if empty space is ahead' do
+      toybot_at(1, 0, :south, 'blocked')
+      expect { docmd }.to change{ @toybot.state }.from('blocked').to('active')
+    end
+
+    it 'should leave Toybot in blocked state if no empty space is ahead' do
+      toybot_at(1, 0, :east)
+      expect { docmd }.to change{ @toybot.state }.from('active').to('blocked')
+    end
   end
 
   describe 'next coordinates calculation' do

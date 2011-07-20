@@ -39,6 +39,16 @@ module Toybot
       end
       after_transition any => :moving, :do => :move_ahead
 
+      event :left_command do
+        transition [:active, :blocked] => :turning_left
+      end
+      after_transition any => :turning_left, :do => :turn_left
+
+      event :right_command do
+        transition [:active, :blocked] => :turning_right
+      end
+      after_transition any => :turning_right, :do => :turn_right
+
       # Block movement should be triggered when there's no empty space ahead -
       # in this case Toybot goes into a blocked state, and ignores all MOVE commands
       # until he's repositioned
@@ -121,10 +131,26 @@ module Toybot
     # To calculate offsets for X and Y we get the index of the direction
     # (i.e. north = 0, east = 1, south = 2 and west = 3) and use it as a basis for x/y calculations
     def coords_ahead
-      dir_index = DIR.index(dir.to_s)
       dx = (dir_index - 2).remainder(2).to_i
       dy = (dir_index - 1).remainder(2).to_i
       [posx - dx, posy - dy]
+    end
+
+    # Calculated index of the current direction of the Toybot
+    def dir_index
+      DIR.index(dir.to_s)
+    end
+
+    # Turns ToyBot left
+    def turn_left
+      @dir = DIR[dir_index - 1] || DIR.last
+      activate
+    end
+
+    # Turns ToyBot right
+    def turn_right
+      @dir = DIR[dir_index + 1] || DIR.first
+      activate
     end
 
   end
