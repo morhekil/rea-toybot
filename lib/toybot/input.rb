@@ -25,7 +25,7 @@ module Toybot
     # the result over to a block given by the caller
     def start(&block)
       while line = next_line
-        cmd, *args = line.downcase.split(' ')
+        cmd, *args = parse(line)
         cmd && !cmd.empty? ?
           # If the command is not empty - invoke the handler
           block.call(cmd, args) :
@@ -35,6 +35,13 @@ module Toybot
     end
 
     protected
+
+    # Parses the input line, converting the case and splitting
+    # the line into a command and it's arguments, returning them
+    # as an array
+    def parse(line)
+      line.downcase.split(' ')
+    end
 
     # This method reads the next line from our input stream. It can be
     # either stdin - in this case we just read it line by line,

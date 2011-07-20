@@ -20,11 +20,17 @@ describe Toybot::Input do
       fail "Stuck in the reading loop"
     end
 
+    # Mock collector and handler to check expectations on command-handling
+    # block
+    before do
+      @collector = double('collector')
+      @handler = Proc.new { |cmd, args| @collector.ping(cmd, args) }
+    end
+
     describe "every line" do
 
       before do
-        @commands = %w{first second last}
-        @collector = double('collector')
+        @commands = %w{FIRST SECOND LAST}
       end
 
       it 'should be read until the empty one' do
@@ -33,39 +39,65 @@ describe Toybot::Input do
         do_start {}
       end
 
-      it 'should be passed to the handler for procesing' do
+      it 'should be parsed' do
         @input.stub(:next_line).and_return { @commands.shift }
-        target = double('Target')
-        target.should_receive(:ping).exactly(3).times.with(
+        @commands.each do |cmdline|
+          @input.should_receive(:parse).ordered.with(cmdline).and_return('boo')
+        end
+        do_start {}
+      end
+
+      it 'should be passed to the handler for procesing if not empty' do
+        @input.stub(:next_line).and_return { @commands.shift }
+        @collector.should_receive(:ping).exactly(3).times.with(
           an_instance_of(String), an_instance_of(Array)
         )
-        handler = Proc.new { |cmd, args| target.ping(cmd, args) }
-        do_start &handler
+        do_start &@handler
+      end
+
+      it 'should not be passed to the handler if empty' do
+        @input.stub(:next_line).and_return(nil)
+        @collector.should_receive(:ping).never
+        do_start &@handler
       end
 
     end
 
-    describe "commands" do
+    describe "line parsing" do
 
-      before do
-        @collector = double('collector')
-        @handler = Proc.new { |cmd, args| @collector.ping(cmd, args) }
+      it 'should downcase the string' do
+        @input.send(:parse, 'COMMAND').should == %w{command}
       end
 
-      it 'should be downcased' do
-        commands = ['COMMAND']
-        @input.stub(:next_line).and_return { commands.shift }
-        @collector.should_receive(:ping).once.with('command', [])
+      it 'should split the line on space char and return an array' do
+        @input.send(:parse, 'COMMAND ARG1 ARG2').should == %w{
+          command arg1 arg2
+        }
+      end
+
+    end
+
+    describe "command and arguments" do
+
+      def run_command(cmd)
+        lines = %w{line}
+        @input.stub(:next_line).and_return { lines.shift }
+        @input.stub(:parse).and_return(cmd)
         do_start &@handler
       end
 
-      it 'should be split on space char and passed with arguments' do
-        commands = ['COMMAND ARG1 ARG2']
-        @input.stub(:next_line).and_return { commands.shift }
+      it "should be a string and an empty array when there're no arguments" do
+        @collector.should_receive(:ping).once.with(
+          'command', []
+        )
+        run_command(%w{command})
+      end
+
+      it "should be a string and an array of string if there're arguments" do
         @collector.should_receive(:ping).once.with(
           'command', ['arg1', 'arg2']
         )
-        do_start &@handler
+        run_command(%w{command arg1 arg2})
       end
 
     end
