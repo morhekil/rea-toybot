@@ -70,7 +70,7 @@ describe Toybot::Input do
       end
 
       it 'should split the line on space char and return an array' do
-        @input.send(:parse, 'COMMAND ARG1 ARG2').should == %w{
+        @input.send(:parse, 'COMMAND ARG1,ARG2').should == %w{
           command arg1 arg2
         }
       end

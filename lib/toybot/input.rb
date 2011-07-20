@@ -40,7 +40,8 @@ module Toybot
     # the line into a command and it's arguments, returning them
     # as an array
     def parse(line)
-      line.downcase.split(' ')
+      cmd, arg_string = line.downcase.split(' ')
+      [cmd, *arg_string.to_s.split(',')]
     end
 
     # This method reads the next line from our input stream. It can be
