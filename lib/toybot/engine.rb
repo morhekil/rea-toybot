@@ -1,3 +1,5 @@
+require 'state_machine'
+
 module Toybot
 
   # Engine class implements Toybot's state and movement logic.
@@ -16,11 +18,18 @@ module Toybot
     # Toybot's orientation
     attr_accessor :dir
 
+    state_machine :state, :initial => :inactive do
+      state :inactive
+      state :active
+      state :blocked
+    end
+
     # Constructor takes board's width and height as it's arguments -
     # those will be the limits for Toybot's movements
     def initialize(width, height)
       @board_width = width
       @board_height = height
+      super()
     end
 
     SLIME_OUTPUT = %w{3,3,NORTH}
