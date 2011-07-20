@@ -159,7 +159,8 @@ module Toybot
 
     # Return ToyBot's current position and direction
     def report
-      @output << "#{posx},#{posy},#{dir.to_s.upcase}"
+      @output.puts "#{posx},#{posy},#{dir.to_s.upcase}"
+      activate
     end
 
   end

@@ -5,7 +5,7 @@ describe 'Toybot Engine' do
 
   # We use 5x3 board for our tests
   before do
-    @output = double('output')
+    @output = double('output', :puts => nil)
     @toybot = Toybot::Engine.new(5, 3, @output)
   end
 
@@ -236,19 +236,29 @@ describe 'Toybot Engine' do
 
     it 'should return current position and direction of Toybot if it is blocked' do
       toybot_at(2, 0, :south, 'blocked')
-      @output.should_receive(:<<).with('2,0,SOUTH')
+      @output.should_receive(:puts).with('2,0,SOUTH')
       docmd
     end
 
     it 'should return current position and direction of Toybot if it is active' do
       toybot_at(2, 1, :west)
-      @output.should_receive(:<<).with('2,1,WEST')
+      @output.should_receive(:puts).with('2,1,WEST')
       docmd
     end
 
     it 'should return nothing if Toybot is inactive' do
-      @output.should_receive(:<<).never
+      @output.should_receive(:puts).never
       docmd
+    end
+
+    it 'should leave Toybot in active state if it was active' do
+      toybot_at(2, 1, :west)
+      expect { docmd }.not_to change{ @toybot.state }
+    end
+
+    it 'should leave Toybot in active state if it was blocked' do
+      toybot_at(2, 0, :south, 'blocked')
+      expect { docmd }.not_to change{ @toybot.state }
     end
   end
 
