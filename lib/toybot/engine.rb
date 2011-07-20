@@ -33,6 +33,11 @@ module Toybot
       before_transition any => :positioning, :do => :validate_position
       after_transition any => :positioning, :do => :place
 
+      event :move_command do
+        transition :active => :moving
+      end
+      after_transition any => :moving, :do => :move_ahead
+
       event :block_movement do
         transition :active => :blocked
       end
@@ -94,8 +99,25 @@ module Toybot
     # Checks if there's an empty space in front of Toybot to move onto.
     # If there's none - Toybot goes into blocked state, ignoring MOVE commands
     def check_ahead
-      has_space = !(pos == [0, 1] && dir == 'west')
-      block_movement unless has_space
+      block_movement unless valid_coordinates?(*coords_ahead)
+    end
+
+    # Moves Toybot one step ahead. We do not check legality of the move here,
+    # as it should be enforced by state machine's guard conditions, and if the move
+    # is illegal - Toybot goes into blocked state and doesn't respond to MOVE commands
+    def move_ahead
+      @posx, @posy = coords_ahead
+      activate
+    end
+
+    # Calculates the next coordinates one step ahead of given position and direction.
+    # To calculate offsets for X and Y we get the index of the direction
+    # (i.e. north = 0, east = 1, south = 2 and west = 3) and use it as a basis for x/y calculations
+    def coords_ahead
+      dir_index = DIR.index(dir.to_s)
+      dx = (dir_index - 2).remainder(2).to_i
+      dy = (dir_index - 1).remainder(2).to_i
+      [posx - dx, posy - dy]
     end
 
   end

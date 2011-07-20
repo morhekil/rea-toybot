@@ -8,6 +8,16 @@ describe 'Toybot Engine' do
     @toybot = Toybot::Engine.new(5, 3)
   end
 
+  # Helper method to set Toybot into a given position and state
+  def toybot_at(x, y, dir, state = nil)
+    @toybot.posx = x
+    @toybot.posy = y
+    @toybot.dir = dir
+    @toybot.activate unless state
+    @toybot.state = state if state
+    @toybot
+  end
+
   describe 'initialization' do
     it 'should remember dimensions of the board' do
       @toybot.board_width.should == 5
@@ -49,11 +59,11 @@ describe 'Toybot Engine' do
 
     describe 'with valid arguments' do
       before do
-        docmd(%w{1 2 north})
+        docmd(%w{1 0 north})
       end
 
       it 'should set the position' do
-        @toybot.pos.should == [1, 2]
+        @toybot.pos.should == [1, 0]
       end
 
       it 'should set the direction' do
@@ -108,12 +118,71 @@ describe 'Toybot Engine' do
 
   end
 
-  describe "blocked movement detection" do
+  describe 'MOVE command' do
+    def docmd
+      @toybot.execute('move', nil)
+    end
 
-    it "should trigger when Toybot is being placed face to the wall" do
+    it 'should get new coordinates and set them if Toybot is active' do
+      toybot_at(1, 1, 'north')
+      @toybot.should_receive(:coords_ahead).at_least(:once).and_return([2, 2])
+      expect { docmd }.to change{@toybot.pos}.from([1, 1]).to([2, 2])
+    end
+
+    it 'should be ignored if Toybot is inactive' do
+      @toybot.should_receive(:coords_ahead).never
+      expect { docmd }.not_to change{@toybot.pos}
+    end
+
+    it 'should be ignored if Toybot is blocked' do
+      toybot_at(0, 0, :west, 'blocked')
+      @toybot.should_receive(:coords_ahead).never
+      expect { docmd }.not_to change{@toybot.pos}
+    end
+
+    it 'should left Toybot in active state if there is more space ahead' do
+      toybot_at(1, 0, :north, 'active')
+      expect { docmd }.not_to change{@toybot.state}
+    end
+
+    it 'should left Toybot in blocked state if there is no space ahead' do
+      toybot_at(0, 1, :south, 'active')
+      expect { docmd }.to change{@toybot.state}.from('active').to('blocked')
+    end
+
+  end
+
+  describe 'blocked movement detection' do
+
+    it 'should trigger when Toybot is being placed face to the wall' do
       @toybot.execute('place', %w{0 1 west})
       @toybot.state.should == 'blocked'
     end
 
   end
+
+  describe 'next coordinates calculation' do
+    def get(x, y, dir)
+      toybot_at(x, y, dir)
+      @toybot.send(:coords_ahead)
+    end
+
+    it 'should increment Y when facing north' do
+      get(1, 1, :north).should == [1, 2]
+    end
+
+    it 'should decrement Y when facing south' do
+      get(1, 1, :south).should == [1, 0]
+    end
+
+    it 'should increment X when facing east' do
+      get(1, 1, :east).should == [2, 1]
+    end
+
+    it 'should decrement X when facing west' do
+      get(1, 1, :west).should == [0, 1]
+    end
+
+  end
+
 end
