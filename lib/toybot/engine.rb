@@ -13,6 +13,8 @@ module Toybot
 
     # Board's dimensions
     attr_accessor :board_width, :board_height
+    # Output object (should respond to :<< ), default is $stdout
+    attr_accessor :output
     # Toybot's position - possible coordinates are 0..(board_size-1)
     attr_accessor :posx, :posy
     # Toybot's orientation
@@ -49,6 +51,11 @@ module Toybot
       end
       after_transition any => :turning_right, :do => :turn_right
 
+      event :report_command do
+        transition [:active, :blocked] => :reporting
+      end
+      after_transition any => :reporting, :do => :report
+
       # Block movement should be triggered when there's no empty space ahead -
       # in this case Toybot goes into a blocked state, and ignores all MOVE commands
       # until he's repositioned
@@ -68,20 +75,17 @@ module Toybot
 
     # Constructor takes board's width and height as it's arguments -
     # those will be the limits for Toybot's movements
-    def initialize(width, height)
+    def initialize(width, height, output = $stdout)
       @board_width = width
       @board_height = height
+      @output = output
       super()
     end
-
-    SLIME_OUTPUT = %w{3,3,NORTH}
 
     def execute(cmd, args)
       event_name = "#{cmd}_command".to_sym
       throw :error, 'Invalid command' unless respond_to?(event_name)
       send(event_name, *args)
-
-      SLIME_OUTPUT.shift
     end
 
     # Returns an array of [posx, posy] for easy access
@@ -151,6 +155,11 @@ module Toybot
     def turn_right
       @dir = Directions[dir_index + 1] || Directions.first
       activate
+    end
+
+    # Return ToyBot's current position and direction
+    def report
+      @output << "#{posx},#{posy},#{dir.to_s.upcase}"
     end
 
   end

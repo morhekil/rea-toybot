@@ -5,7 +5,8 @@ describe 'Toybot Engine' do
 
   # We use 5x3 board for our tests
   before do
-    @toybot = Toybot::Engine.new(5, 3)
+    @output = double('output')
+    @toybot = Toybot::Engine.new(5, 3, @output)
   end
 
   # Helper method to set Toybot into a given position and state
@@ -221,6 +222,33 @@ describe 'Toybot Engine' do
     it 'should leave Toybot in blocked state if no empty space is ahead' do
       toybot_at(1, 0, :east)
       expect { docmd }.to change{ @toybot.state }.from('active').to('blocked')
+    end
+  end
+
+  describe 'REPORT command' do
+    def docmd
+      @toybot.execute('report', nil)
+    end
+
+    it 'should be known to the engine' do
+      @toybot.should respond_to(:report_command)
+    end
+
+    it 'should return current position and direction of Toybot if it is blocked' do
+      toybot_at(2, 0, :south, 'blocked')
+      @output.should_receive(:<<).with('2,0,SOUTH')
+      docmd
+    end
+
+    it 'should return current position and direction of Toybot if it is active' do
+      toybot_at(2, 1, :west)
+      @output.should_receive(:<<).with('2,1,WEST')
+      docmd
+    end
+
+    it 'should return nothing if Toybot is inactive' do
+      @output.should_receive(:<<).never
+      docmd
     end
   end
 
